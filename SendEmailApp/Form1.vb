@@ -2,20 +2,23 @@
 Imports System.Net.Mail
 Imports ExcelDataReader
 
-Imports Excel = Microsoft.Office.Interop.Excel
-Imports Office = Microsoft.Office.Core
-
 
 
 Public Class Form1
     Public tables As DataTableCollection
+    Public pathname As String()
+    Public FromEmail As String
+    Public SubjectLib As String
+    Public EmailText As String
+    Public ToEmail As String
+
+
+
     Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        ' Set the caption bar text of the form.   
-        Me.Text = "send Multiple mail"
+        Me.Text = "Multiple Email - LVDC"
     End Sub
 
     Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
-
 
         Try
             Dim Smtp_Server As New SmtpClient
@@ -27,12 +30,11 @@ Public Class Form1
             Smtp_Server.Host = "in-v3.mailjet.com"
 
             e_mail = New MailMessage()
-            ' e_mail.From = New MailAddress(txtFrom.Text)
-            e_mail.From = New MailAddress("Enquête sur le devenir des candidats au titre professionnel <ministere.travail@survey-lvdc.fr>")
-            e_mail.To.Add(txtTo.Text)
-            e_mail.Subject = "Send mail test"
+            e_mail.From = New MailAddress(SubjectLib + " <" + FromEmail + ">")
+            e_mail.To.Add(ToEmail)
+            e_mail.Subject = SubjectLib
             e_mail.IsBodyHtml = True
-            e_mail.Body = txtMessage.Text
+            e_mail.Body = EmailText
             Smtp_Server.Send(e_mail)
             MsgBox("Mail envoyé avec succès")
 
@@ -42,12 +44,9 @@ Public Class Form1
     End Sub
 
     Private Sub getMails()
-
-
         Using ofd As OpenFileDialog = New OpenFileDialog() With {.Filter = "Excel 97-2003 Workbook|*.xlsx|*.xlsx|Excel Workbook"}
             If ofd.ShowDialog() = DialogResult.OK Then
                 txtBA.Text = ofd.FileName
-                txtMessage.Text = ""
                 Using stream = File.Open(ofd.FileName, FileMode.Open, FileAccess.Read)
                     Using reader As IExcelDataReader = ExcelReaderFactory.CreateReader(stream)
                         Dim result As DataSet = reader.AsDataSet(New ExcelDataSetConfiguration() With {
@@ -65,39 +64,51 @@ Public Class Form1
         End Using
     End Sub
 
-    Private Sub DataGridView1_CellContentClick(sender As Object, e As DataGridViewCellEventArgs) Handles dataGr.CellContentClick
-
-    End Sub
-
     Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
         getMails()
     End Sub
 
     Private Sub ComboBox1_SelectedIndexChanged(sender As Object, e As EventArgs) Handles cboSheet.SelectedIndexChanged
+
+        pathname = txtBA.Text.Split(New Char() {"\"c})
+        Dim chemin As String
+        chemin = ""
+        For i = 0 To pathname.Length - 2
+            chemin = chemin + pathname(i) + "\"
+        Next
+
         Dim dt As DataTable = tables(cboSheet.SelectedItem.ToString())
         dataGr.DataSource = dt
 
-        txtTo.Text = dt.Rows(0).Item(1) 'l'idée sera davoir les mail un par un - - avec une boucle 
+        'la boucle commence par ici
+
+        FromEmail = dt.Rows(0).Item(4) 'expéditeur
+        SubjectLib = dt.Rows(0).Item(3) 'On récupere l'objet
+        ToEmail = dt.Rows(0).Item(1) 'l'idée sera davoir les mail un par un - - avec une boucle 
+
 
         Dim line As String
         Dim fileReader As System.IO.StreamReader
-        fileReader = My.Computer.FileSystem.OpenTextFileReader("C:\Users\BenD\Desktop\3078_DECPROV2.html") 'récupérer après tous les mails dans le dossier
+        fileReader = My.Computer.FileSystem.OpenTextFileReader(chemin + dt.Rows(0).Item(2)) 'récupérer après tous les mails dans le dossier. Le row change
         line = fileReader.ReadLine
         While (line IsNot Nothing)
             line = fileReader.ReadLine
-            txtMessage.Text = txtMessage.Text + line
+            EmailText = EmailText + line
         End While
 
-        'MsgBox(dt.Columns.Count)
 
-        For j = 2 To dt.Columns.Count - 1
-            Dim crochetGauche As Integer = txtMessage.Text.IndexOf("[")
-            Dim crochetDroite As Integer = txtMessage.Text.IndexOf("]")
+        'On renseigne les infos fichier et dans l'odre d'affichage dans le mail
+        For j = 5 To dt.Columns.Count - 1
+            Dim crochetGauche As Integer = EmailText.IndexOf("[")
+            Dim crochetDroite As Integer = EmailText.IndexOf("]")
 
-            Dim var1 = Mid(txtMessage.Text, crochetGauche + 1, crochetDroite - crochetGauche + 1)
-            txtMessage.Text = txtMessage.Text.Replace(var1, dt.Rows(0).Item(j))
+            Dim var1 = Mid(EmailText, crochetGauche + 1, crochetDroite - crochetGauche + 1)
+            EmailText = EmailText.Replace(var1, dt.Rows(0).Item(j))
 
         Next
+
+
+
 
 
     End Sub
