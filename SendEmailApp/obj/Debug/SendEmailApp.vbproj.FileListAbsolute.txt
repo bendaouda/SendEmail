@@ -18,3 +18,4 @@ C:\Users\BenD\source\repos\SendEmailApp\SendEmailApp\bin\Debug\ExcelDataReader.D
 C:\Users\BenD\source\repos\SendEmailApp\SendEmailApp\bin\Debug\ExcelDataReader.DataSet.xml
 C:\Users\BenD\source\repos\SendEmailApp\SendEmailApp\obj\Debug\SendEmailApp.vbproj.CopyComplete
 C:\Users\BenD\source\repos\SendEmailApp\SendEmailApp\obj\Debug\SendEmailApp.vbprojAssemblyReference.cache
+C:\Users\BenD\source\repos\SendEmailApp\SendEmailApp\obj\Debug\SendEmailApp.Help.resources

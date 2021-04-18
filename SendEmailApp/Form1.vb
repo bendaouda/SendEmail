@@ -124,5 +124,12 @@ Public Class Form1
 
     End Sub
 
+    Private Sub ToolTip1_Popup(sender As Object, e As PopupEventArgs)
+        Me.Text = "Help"
+    End Sub
 
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        Help.Show()
+
+    End Sub
 End Class
